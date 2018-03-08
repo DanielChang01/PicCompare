@@ -23,6 +23,7 @@ public class PicHandleBizImpl implements PicHandleBiz {
     public BufferedImage getComparedImage(int[][] resourceRGB, int[][] comparedRGB, String baseCoord) throws IOException {
         int width = resourceRGB.length;
         int height = resourceRGB[0].length;
+        double blackPointNum = 0;
         //将需要对比的图片转化为操作的背景图层
         String compare = this.getClass().getClassLoader().getResource("files/WechatIMG183-compare.jpg").getPath();
         BufferedImage img = ImageIO.read(new File(compare));
@@ -47,6 +48,8 @@ public class PicHandleBizImpl implements PicHandleBiz {
             //获取基准点
             baseX = Integer.parseInt(split[0]);
             baseY = Integer.parseInt(split[1]);
+            blackPointNum += baseX * width;
+            blackPointNum += baseY * height;
             //将列置黑
             setBackBlack(height, g2D, baseX);
             //将行置黑
@@ -55,6 +58,7 @@ public class PicHandleBizImpl implements PicHandleBiz {
         for (int line = baseX; line < width; line ++){
             for (int row = baseY; row < height; row ++){
                 if (resourceRGB[line][row] == comparedRGB[line][row]){
+                    blackPointNum ++;
                     //将对比相同的像素点置黑
                     //由于某些未知原因，相同像素点未必可以完全置黑，所以临时的解决方法是将置黑的像素点扩大10倍
                     //TODO
@@ -69,6 +73,7 @@ public class PicHandleBizImpl implements PicHandleBiz {
             }
         }
 
+        double ratio = 1 - (blackPointNum/(height*width));
         //对比后的图片输出
         //后期将拆出为单独的方法
         //TODO
